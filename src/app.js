@@ -1,5 +1,12 @@
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
+import { apiLimiter } from "./middlewares/rateLimit.middleware.js";
+import compression from "compression";
+import morgan from "morgan";
+import {errorHandler} from "./middlewares/error.middleware.js";
+
+
 import authRoutes from "./modules/auth/auth.routes.js";
 import userRoutes from "./modules/user/user.routes.js";
 import artistRoutes from "./modules/artist/artist.routes.js";
@@ -10,9 +17,18 @@ import adminRoutes from "./modules/admin/admin.routes.js";
 
 const app = express();
 
+app.use("/api", apiLimiter);
+app.use(morgan("dev"));
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(
+  helmet({
+    crossOriginResourcePolicy: false,
+  })
+);
+app.use(compression());
+app.use(errorHandler);
 
 app.get("/", (req, res) => {
   res.json({
